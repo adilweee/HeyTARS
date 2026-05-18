@@ -3,9 +3,9 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = Number(process.env.PORT || 5600);
-// BURAYA 1. ADIMDA ALDIĞIN API KEY'İ YAPIŞTIR:
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+// Render panelinden gelecek olan güvenli anahtar:
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MEMORY_PATH = path.join(__dirname, "memory.json");
 
 function sendJson(res, status, data) {
@@ -113,36 +113,40 @@ Kurallar:
 - Cevabını genelde 1-5 cümle tut. Gereksiz uzun konuşma.
 - Kullanıcı isterse detaylandır.`;
 
-  // Gemini API'sine uygun veri yapısı oluşturuluyor
+  if (!GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY sunucuda tanımlanmamış. Lütfen Render panelini kontrol et.");
+  }
+
   const payload = {
-    contents: [
-      {
-        parts: [
-          { text: `${systemInstruction}\n\nKullanıcı mesajı: ${message}\n\nHeyT.A.R.S cevabı:` }
-        ]
-      }
-    ]
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: message }
+    ],
+    temperature: 0.7
   };
 
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(GROQ_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify(payload)
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || "Gemini API Hatası oluştu.");
+      throw new Error(data.error?.message || "Groq API Hatası oluştu.");
     }
 
-    // Gemini'den gelen metni ayıklama
-    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const answer = data.choices?.[0]?.message?.content?.trim();
     return answer || "Cevap üretemedim. Geçici bir kesinti olabilir.";
 
   } catch (error) {
-    throw new Error(`Bulut yapay zeka bağlantı hatası: ${error.message}`);
+    throw new Error(`Groq bulut bağlantı hatası: ${error.message}`);
   }
 }
 
@@ -177,8 +181,8 @@ const server = http.createServer(async (req, res) => {
 
       sendJson(res, 200, {
         answer,
-        provider: "gemini",
-        model: "Gemini 2.5 Flash",
+        provider: "groq",
+        model: "Llama 3.3 (Groq)",
         memory: readMemory()
       });
     } catch (error) {
@@ -217,5 +221,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`HeyT.A.R.S Bulut Sürümü çalışıyor: http://localhost:${PORT}`);
+  console.log(`HeyT.A.R.S Groq Sürümü aktif: http://localhost:${PORT}`);
 });

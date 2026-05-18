@@ -277,7 +277,7 @@
             }
         }
 
-        /* ===== EKSTRA MOBİL FIX (SONRADAN EKLENEN) ===== */
+        /* ===== DÜZELTİLMİŞ MOBİL FIX ===== */
 
         html,
         body {
@@ -285,25 +285,15 @@
             overflow-x: hidden;
         }
 
-        .main {
-            width: 100%;
-            min-width: 0;
-        }
-
         .messages {
             overflow-x: hidden;
         }
 
+        /* SADECE MOBİLDE ÇALIŞIR */
         @media (max-width: 768px) {
 
             body {
                 overflow: hidden;
-            }
-
-            .main {
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
             }
 
             .messages {

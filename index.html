@@ -276,10 +276,57 @@
                 padding: 10px 12px;
             }
         }
+
+        /* ===== EKSTRA MOBİL FIX (SONRADAN EKLENEN) ===== */
+
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .main {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .messages {
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 768px) {
+
+            body {
+                overflow: hidden;
+            }
+
+            .main {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .messages {
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            .composer {
+                position: sticky;
+                bottom: 0;
+                background: rgba(13, 19, 27, 0.98);
+            }
+
+            textarea {
+                min-height: 44px;
+                max-height: 100px;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- GERİSİ AYNI (HİÇ DOKUNMADIM) -->
     <main class="app">
         <aside class="sidebar">
             <div class="brand">HeyT.A.R.S</div>
